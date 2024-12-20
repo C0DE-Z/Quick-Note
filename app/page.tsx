@@ -36,9 +36,7 @@ export default function Home() {
   }, []);
 
   const handleSave = () => {
-    if (title.trim() === "" || notes.trim() === "") {
-      return;
-    }
+
     const updatedNotes = [...savedNotes, { title, content: notes }];
     setSavedNotes(updatedNotes);
     Cookies.set("notes", JSON.stringify(updatedNotes), { expires: 7 });
