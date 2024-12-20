@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-
 // Imports 
 import { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
@@ -10,7 +9,7 @@ import NoteDisplay from "./components/notes/NoteDisplay";
 import NoteEditor from "./components/notes/NoteEditor";
 import Tabs from "./components/ui/tabs/Tabs";
 import SearchBar from "./components/ui/search/SearchBar";
-
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [title, setTitle] = useState("");
@@ -22,6 +21,7 @@ export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const savedNotes = Cookies.get("notes");
