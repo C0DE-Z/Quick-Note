@@ -1,27 +1,120 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-// Imports 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import ReactMarkdown from "react-markdown";
-import NoteDisplay from "./components/notes/NoteDisplay";
-import NoteEditor from "./components/notes/NoteEditor";
-import Tabs from "./components/ui/tabs/Tabs";
-import SearchBar from "./components/ui/search/SearchBar";
-import { useRouter } from "next/navigation";
+import { CiSettings } from "react-icons/ci";
+
+function NoteEditor({
+  title,
+  setTitle,
+  notes,
+  setNotes,
+  handleSave,
+}: {
+  title: string;
+  setTitle: React.Dispatch<React.SetStateAction<string>>;
+  notes: string;
+  setNotes: React.Dispatch<React.SetStateAction<string>>;
+  handleSave: () => void;
+}) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
+    }
+  };
+
+  return (
+    <div className="w-full">
+      <input
+        type="text"
+        className="w-full p-2 mb-4 bg-gray-800 text-gray-100 rounded-lg focus:outline-none"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Note title..."
+      />
+      <textarea
+        className="w-full h-64 p-4 bg-gray-800 text-gray-100 rounded-lg focus:outline-none"
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Start taking notes..."
+      />
+      <button
+        className="mt-4 px-6 py-2 bg-gray-700 text-gray-100 rounded-lg hover:bg-gray-600"
+        onClick={handleSave}
+      >
+        Save Notes
+      </button>
+    </div>
+  );
+}
+
+function NoteDisplay({ notes }: { notes: { title: string; content: string }[] }) {
+  return (
+    <div className="w-full mt-8 p-4 bg-gray-800 text-gray-100 rounded-lg">
+      {notes.map((note, index) => (
+        <div key={index} className="mb-4 p-4 bg-gray-700 rounded-lg">
+          <h2 className="text-xl font-bold">{note.title}</h2>
+          <ReactMarkdown>{note.content}</ReactMarkdown>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SearchBar({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: React.Dispatch<React.SetStateAction<string>> }) {
+  return (
+    <input
+      type="text"
+      className="w-full p-2 bg-gray-800 text-gray-100 rounded-lg focus:outline-none"
+      placeholder="Search notes..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+    />
+  );
+}
+
+function Tabs({ tabs, activeTab, setActiveTab, closeTab }: { tabs: { title: string; content: string }[]; activeTab: number; setActiveTab: React.Dispatch<React.SetStateAction<number>>; closeTab: (index: number) => void }) {
+  return (
+    <div className="flex flex-col gap-2 mb-4 w-full">
+      <button
+        className={`px-4 py-2 rounded-lg text-left ${activeTab === 0 ? "bg-gray-700 text-gray-100" : "bg-gray-800 text-gray-400"}`}
+        onClick={() => setActiveTab(0)}
+      >
+         Home
+      </button>
+      {tabs.map((tab, index) => (
+        tab.title && tab.content && (
+          <div key={index} className="flex items-center">
+            <button
+              className={`flex-1 px-4 py-2 rounded-lg text-left ${activeTab === index + 1 ? "bg-gray-700 text-gray-100" : "bg-gray-800 text-gray-400"}`}
+              onClick={() => setActiveTab(index + 1)}
+            >
+              {tab.title}
+            </button>
+            <button
+              className="ml-2 px-2 py-1 bg-[#591c1c76] text-gray-100 rounded-lg"
+              onClick={() => closeTab(index)}
+            >
+              ✕
+            </button>
+          </div>
+        )
+      ))}
+    </div>
+  );
+}
 
 export default function Home() {
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
-  const [currentNote, setCurrentNote] = useState<{ title: string; content: string }>({ title: "", content: "" });
   const [savedNotes, setSavedNotes] = useState<{ title: string; content: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [sidebarWidth, setSidebarWidth] = useState(250);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const savedNotes = Cookies.get("notes");
@@ -36,7 +129,6 @@ export default function Home() {
   }, []);
 
   const handleSave = () => {
-
     const updatedNotes = [...savedNotes, { title, content: notes }];
     setSavedNotes(updatedNotes);
     Cookies.set("notes", JSON.stringify(updatedNotes), { expires: 7 });
@@ -56,62 +148,34 @@ export default function Home() {
   };
 
   const filteredNotes = savedNotes.filter((note) =>
-    (note.title && typeof note.title === 'string' && note.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (note.content && typeof note.content === 'string' && note.content.toLowerCase().includes(searchQuery.toLowerCase()))
+    (note.title && note.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (note.content && note.content.toLowerCase().includes(searchQuery.toLowerCase()))
   );
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const startX = e.clientX;
-    const startWidth = sidebarRef.current?.offsetWidth || 250;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const newWidth = startWidth + (e.clientX - startX);
-      setSidebarWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  };
 
   return (
     <div className="min-h-screen p-8 pb-20 bg-gray-900 text-gray-100 font-sans flex">
-      <div
-        ref={sidebarRef}
-        className={`h-full ${isSidebarOpen ? "block" : "hidden"} md:block`}
-        style={{ width: sidebarWidth }}
-      >
+      <div className={`w-1/4 ${isSidebarOpen ? "block" : "hidden"} md:block`}>
         <Tabs tabs={savedNotes} activeTab={activeTab} setActiveTab={setActiveTab} closeTab={closeTab} />
-        <div
-          className="absolute top-0 right-0 h-full w-2 cursor-col-resize"
-          onMouseDown={handleMouseDown}
-        />
       </div>
-      <main className="flex flex-col gap-8 items-center w-full">
+      <div className="md:hidden">
+        <button
+          className="px-4 py-2 bg-gray-700 text-gray-100 rounded-lg"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          ☰
+        </button>
+      </div>
+      <main className="flex flex-col gap-8 items-center w-3/4">
         <h1 className="text-3xl font-bold">QuickNote</h1>
         <h2 className="text-1xl font-normal">Easily Take locally cached notes</h2>
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        {searchQuery ? (
-          <div className="w-full mt-8 p-4 bg-gray-800 text-gray-100 rounded-lg">
-            {filteredNotes.map((note, index) => (
-              <div key={index} className="mb-4 p-4 bg-gray-700 rounded-lg cursor-pointer" onClick={() => setActiveTab(index + 1)}>
-                <h2 className="text-xl font-bold">{note.title}</h2>
-                <ReactMarkdown>{note.content}</ReactMarkdown>
-              </div>
-            ))}
-          </div>
-        ) : activeTab === 0 ? (
-          <NoteEditor title={title} setTitle={setTitle} notes={notes} setNotes={setNotes} handleSave={handleSave} />
+        {activeTab === 0 ? (
+          <>
+            <NoteEditor title={title} setTitle={setTitle} notes={notes} setNotes={setNotes} handleSave={handleSave} />
+            <NoteDisplay notes={filteredNotes} />
+          </>
         ) : (
-          savedNotes[activeTab - 1] && (
-             <>
-              <NoteDisplay notes={[savedNotes[activeTab - 1]]} setNotes={setSavedNotes} handleSave={handleSave} /> 
-            </>
-          )
+          <NoteDisplay notes={[savedNotes[activeTab - 1]]} />
         )}
       </main>
     </div>
