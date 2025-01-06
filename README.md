@@ -1,8 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QuickNote
+
+QuickNote is a simple note-taking application built with Next.js. It allows you to take locally cached notes, search through them, and manage them with ease. The application also includes a settings page where you can customize the appearance and behavior of the app.
+
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-username/quicknote.git
+```
+
+2. Navigate to the project directory:
+
+```bash
+cd quicknote
+```
+
+3. Install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+### Running the Development Server
+
+Start the development server:
 
 ```bash
 npm run dev
@@ -16,9 +51,45 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Build the application for production:
+
+```bash
+npm run build
+# or
+yarn build
+# or
+pnpm build
+# or
+bun build
+```
+
+Start the production server:
+
+```bash
+npm start
+# or
+yarn start
+# or
+pnpm start
+# or
+bun start
+```
+
+## Customization
+
+### Settings
+
+You can customize the appearance and behavior of the application through the settings page. The settings include:
+
+- Dark mode toggle
+- Font size adjustment
+- Password protection for notes
+
+### Adding New Features
+
+To add new features, you can start by modifying the existing components or creating new ones in the `components` directory. The main application logic is located in the `app` directory.
 
 ## Learn More
 
